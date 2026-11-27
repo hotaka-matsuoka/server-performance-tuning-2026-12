@@ -46,7 +46,9 @@ func NewMySQL(cfg *config.DBConfig) (*sql.DB, error) {
 	// https://github.com/go-sql-driver/mysql/blob/5a8a207333b3cbdd6f50a31da2d448658343637e/README.md#system-variables
 	tz := url.QueryEscape("'" + dbTimeZone + "'")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local&time_zone=%s",
+	// Aurora は require_secure_transport=ON のため TLS 必須。
+	// コンテナに RDS の CA 証明書が無いため、暗号化はするが証明書検証は省略する。
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local&time_zone=%s&tls=skip-verify",
 		cfg.RawDBConfig.Username,
 		cfg.RawDBConfig.Password,
 		cfg.RawDBConfig.Host,
